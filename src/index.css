@@ -1,0 +1,422 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: "Playfair Display", ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  --color-bone: #f7f7f5;
+  --color-charcoal: #1a1a1a;
+  --color-stone: #8a8a8a;
+  --color-gold: #c5a47e;
+
+  /* Motion scale — every transition on the site pulls from these. */
+  --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-swift: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-instant: 150ms;
+  --duration-quick: 250ms;
+  --duration-smooth: 450ms;
+  --duration-slow: 700ms;
+
+  --shadow-lift: 0 18px 40px -14px rgb(26 26 26 / 0.22);
+  --shadow-lift-strong: 0 28px 60px -20px rgb(26 26 26 / 0.3);
+  --shadow-lift-dark: 0 18px 40px -14px rgb(0 0 0 / 0.55);
+}
+
+html {
+  /* Kept `auto` on purpose: the GSAP scroll tween drives window.scrollTo every
+     frame, and native smooth scrolling would fight it. In-app smooth scrolling
+     is handled in src/lib/smoothScroll.js. */
+  scroll-behavior: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  /* Offsets native/fragment jumps (e.g. no-JS) below the fixed header. */
+  scroll-padding-top: 5rem;
+}
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background-color: var(--color-bone);
+  color: var(--color-charcoal);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  min-height: 100svh;
+}
+
+::selection {
+  background-color: var(--color-gold);
+  color: var(--color-charcoal);
+}
+
+/* ─── Focus ─────────────────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-gold);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+/* Keyboard users get a clear ring; pointer users don't. */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.skip-link {
+  position: absolute;
+  top: -60px;
+  left: 0;
+  z-index: 100;
+  padding: 12px 20px;
+  background: var(--color-charcoal);
+  color: var(--color-bone);
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: top var(--duration-quick) var(--ease-expo);
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ─── Link: underline wipes in from the left ────────────────────── */
+.link-underline {
+  position: relative;
+  display: inline-block;
+  transition: color var(--duration-quick) var(--ease-swift);
+}
+
+.link-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 1px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform var(--duration-smooth) var(--ease-expo);
+}
+
+.link-underline:hover::after,
+.link-underline:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* ─── Buttons: gold fill sweeps across, label stays put ─────────── */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  overflow: hidden;
+  padding: 1rem 2rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition:
+    color var(--duration-quick) var(--ease-swift),
+    border-color var(--duration-quick) var(--ease-swift),
+    transform var(--duration-quick) var(--ease-expo),
+    box-shadow var(--duration-quick) var(--ease-swift);
+}
+
+.btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform var(--duration-smooth) var(--ease-expo);
+}
+
+.btn > * {
+  position: relative;
+  z-index: 1;
+}
+
+.btn:hover,
+.btn:focus-visible {
+  transform: translateY(-2px);
+}
+
+.btn:active {
+  transform: translateY(0);
+  transition-duration: var(--duration-instant);
+}
+
+.btn-primary {
+  background-color: var(--color-charcoal);
+  color: var(--color-bone);
+}
+
+.btn-primary::before {
+  background-color: var(--color-gold);
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  color: var(--color-charcoal);
+  box-shadow: var(--shadow-lift);
+}
+
+.btn-primary:hover::before,
+.btn-primary:focus-visible::before {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.btn-outline {
+  border-color: color-mix(in srgb, currentColor 35%, transparent);
+  background-color: transparent;
+}
+
+.btn-outline:hover,
+.btn-outline:focus-visible {
+  border-color: var(--color-gold);
+  color: var(--color-gold);
+}
+
+/* Arrow nudges forward on hover. */
+.btn-arrow {
+  display: inline-block;
+  transition: transform var(--duration-smooth) var(--ease-expo);
+}
+
+.btn:hover .btn-arrow,
+.btn:focus-visible .btn-arrow {
+  transform: translateX(4px);
+}
+
+/* ─── Cards: deepen shadow and warm the border ─────────────────────
+   The vertical lift is applied by Framer Motion (see useHoverLift), because
+   Motion writes an inline transform that would override a CSS rule here. */
+.card {
+  position: relative;
+  transition:
+    box-shadow var(--duration-smooth) var(--ease-expo),
+    border-color var(--duration-smooth) var(--ease-swift),
+    background-color var(--duration-smooth) var(--ease-swift);
+}
+
+.card-light {
+  border: 1px solid rgb(26 26 26 / 0.1);
+  background-color: #fff;
+}
+
+.card-light:hover,
+.card-light:focus-within {
+  border-color: color-mix(in srgb, var(--color-gold) 60%, transparent);
+  box-shadow: var(--shadow-lift);
+}
+
+.card-dark {
+  border: 1px solid rgb(255 255 255 / 0.1);
+  background-color: rgb(255 255 255 / 0.05);
+}
+
+.card-dark:hover,
+.card-dark:focus-within {
+  border-color: color-mix(in srgb, var(--color-gold) 50%, transparent);
+  background-color: rgb(255 255 255 / 0.09);
+  box-shadow: var(--shadow-lift-dark);
+}
+
+/* Icon tile inside a card: gains the gold fill on hover. */
+.icon-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: color-mix(in srgb, var(--color-gold) 12%, transparent);
+  color: var(--color-gold);
+  transition:
+    background-color var(--duration-quick) var(--ease-swift),
+    color var(--duration-quick) var(--ease-swift),
+    transform var(--duration-smooth) var(--ease-expo);
+}
+
+.group:hover .icon-tile,
+.group:focus-within .icon-tile {
+  background-color: var(--color-gold);
+  color: var(--color-charcoal);
+  transform: scale(1.06) rotate(-4deg);
+}
+
+/* Hairline that expands from the top edge on hover. */
+.card-rule {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background-color: var(--color-gold);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration-slow) var(--ease-expo);
+}
+
+.card:hover .card-rule,
+.card:focus-within .card-rule {
+  transform: scaleX(1);
+}
+
+/* ─── Form fields ───────────────────────────────────────────────── */
+.field {
+  width: 100%;
+  border-bottom: 1px solid rgb(26 26 26 / 0.2);
+  background-color: transparent;
+  padding: 0.75rem 0;
+  color: var(--color-charcoal);
+  outline: none;
+  transition:
+    border-color var(--duration-quick) var(--ease-swift),
+    background-color var(--duration-quick) var(--ease-swift);
+}
+
+.field::placeholder {
+  color: color-mix(in srgb, var(--color-stone) 55%, transparent);
+}
+
+.field:hover {
+  border-bottom-color: rgb(26 26 26 / 0.35);
+  background-color: rgb(26 26 26 / 0.015);
+}
+
+.field:focus {
+  border-bottom-color: var(--color-gold);
+  background-color: transparent;
+}
+
+/* ─── Eyebrow labels ────────────────────────────────────────────── */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+}
+
+/* Rule that draws itself in when the section scrolls into view. */
+.eyebrow::after {
+  content: '';
+  width: 2.5rem;
+  height: 1px;
+  background-color: color-mix(in srgb, var(--color-gold) 45%, transparent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--duration-slow) var(--ease-expo) 150ms;
+}
+
+.group\/eyebrow:hover::after {
+  transform: scaleX(1);
+}
+
+/* ─── Nav ───────────────────────────────────────────────────────── */
+.nav-link {
+  position: relative;
+  padding-block: 0.25rem;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-bone) 80%, transparent);
+  transition: color var(--duration-quick) var(--ease-swift);
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 1px;
+  background-color: var(--color-gold);
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform var(--duration-smooth) var(--ease-expo);
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+  color: var(--color-gold);
+}
+
+.nav-link:hover::after,
+.nav-link:focus-visible::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+/* Persistent marker for the section currently on screen. */
+.nav-link[data-active='true'] {
+  color: var(--color-gold);
+}
+
+.nav-link[data-active='true']::after {
+  transform: scaleX(1);
+}
+
+/* ─── Scroll progress rail ──────────────────────────────────────── */
+.scroll-rail {
+  position: relative;
+  height: 2px;
+  background-color: rgb(255 255 255 / 0.1);
+  overflow: hidden;
+}
+
+.scroll-rail-fill {
+  height: 100%;
+  background-color: var(--color-gold);
+  transform-origin: left;
+  will-change: transform;
+}
+
+/* ─── Reveal-on-scroll primitive ────────────────────────────────── */
+.reveal {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Framer Motion drives these inline, so neutralise the class too. */
+  .reveal {
+    opacity: 1;
+    transform: none !important;
+  }
+
+  .btn:hover,
+  .btn:focus-visible,
+  .card:hover,
+  .card:focus-within,
+  .card-light:hover,
+  .card-dark:hover,
+  .icon-tile,
+  .group:hover .icon-tile {
+    transform: none !important;
+  }}
